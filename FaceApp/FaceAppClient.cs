@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FaceApp
@@ -31,16 +32,17 @@ namespace FaceApp
         /// <param name="filter"></param>
         /// Type of filter to be applied.
         /// <returns></returns>
-        public async Task<Stream> ApplyFilterAsync(string code, FilterType filter)
+        public async Task<Stream> ApplyFilterAsync(string code, FilterType filter, CancellationToken ct = default(CancellationToken))
         {
             bool cropped = false;
             if (filter == FilterType.Male || filter == FilterType.Female)
                 cropped = true;
-            var reqUrl = $"{BASE_URL}/{code}/filters/{Enum.GetName(typeof(FilterType), filter).ToLower()}?cropped={cropped}";
+            var reqUrl = $"{BASE_URL}/{code}/filters/{filter.ToString().ToLower()}?cropped={cropped}";
             var request = new HttpRequestMessage(HttpMethod.Get, reqUrl);
             request.Headers.Add("User-Agent", USER_AGENT);
             request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
-            var response = await _client.SendAsync(request);
+            ct.ThrowIfCancellationRequested();
+            var response = await _client.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode)
             {
                 string errorCode = null;
@@ -58,7 +60,7 @@ namespace FaceApp
         /// <param name="uri"></param>
         /// The valid uri of the image.
         /// <returns></returns>
-        public async Task<string> GetCodeAsync(Uri uri)
+        public async Task<string> GetCodeAsync(Uri uri, CancellationToken ct = default(CancellationToken))
         {
             using (var imageStream = await _client.GetStreamAsync(uri))
             {
@@ -69,7 +71,8 @@ namespace FaceApp
                 var mutipartContent = new MultipartFormDataContent();
                 mutipartContent.Add(streamContent, "file", "file");
                 request.Content = mutipartContent;
-                var response = await _client.SendAsync(request);
+                ct.ThrowIfCancellationRequested();
+                var response = await _client.SendAsync(request, ct);
                 var jsonStr = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
@@ -89,9 +92,8 @@ namespace FaceApp
         /// <param name="path"></param>
         /// Valid path of the file.
         /// <returns></returns>
-        public async Task<string> GetCodeAsync(string path)
+        public async Task<string> GetCodeAsync(string path, CancellationToken ct = default(CancellationToken))
         {
-            //too lazy to make a proper exception handler.
             if (!File.Exists(path))
                 throw new FileNotFoundException("The file specified was not found.");
             using (var imageStream = File.Open(path, FileMode.Open))
@@ -104,7 +106,8 @@ namespace FaceApp
                 var mutipartContent = new MultipartFormDataContent();
                 mutipartContent.Add(streamContent, "file", fileName);
                 request.Content = mutipartContent;
-                var response = await _client.SendAsync(request);
+                ct.ThrowIfCancellationRequested();
+                var response = await _client.SendAsync(request, ct);
                 var jsonStr = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {

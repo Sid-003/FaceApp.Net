@@ -15,7 +15,7 @@ namespace FaceApp
 
         public override string ToString()
         {
-            return $"{Enum.GetName(typeof(ExceptionType), this.Type)} : {Message}";
+            return $"{Type} : {Message}";
         }
     }
 }
