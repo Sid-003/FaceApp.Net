@@ -13,7 +13,7 @@ if(Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
     //I am just going to do the success part.
     if (bareUpResponse.IsSuccess)
     {
-        var uploadResponse = bareUpResponse as FaceUploadResponse. //Always use soft-cast when possible.
+        var uploadResponse = bareUpResponse as FaceUploadResponse; //Always use soft cast when possible.
         var bareApplyResponse = await faceClient.ApplyFilterAsync(uploadResponse.ImageCode, FilterType.Smile); //here is where you pick the filer.
         //Do success checks again and cast appopriately. Use FaceApplyResponse for success and FaceErrorResponse for error.
         //Note: For the apply endpoint, the API never provided a description so all you have is the error code (For ex: "no_photo_found").
