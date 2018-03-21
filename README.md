@@ -19,7 +19,7 @@ if(Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
         //Note: For the apply endpoint, the API never provided a description so all you have is the error code (For ex: "no_photo_found").
         if (bareApplyResponse.IsSuccess)
         {
-            var uploadResponse = bareApplyResponse as FaceApplyResponse;
+            var filterResponse = bareApplyResponse as FaceApplyResponse;
             //Now you can access the ImageStream property, do whatever you want with it. 
             //Note: The image will probably be in jpeg format. (Not my fault, don't hit me.)
         }
