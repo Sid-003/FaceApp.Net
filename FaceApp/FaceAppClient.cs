@@ -1,5 +1,4 @@
-﻿using FaceApp.Response;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
@@ -32,7 +31,7 @@ namespace FaceApp
         /// <param name="filter"></param>
         /// Type of filter to be applied.
         /// <returns></returns>
-        public async Task<IFaceResponse> ApplyFilterAsync(string code, FilterType filter)
+        public async Task<Stream> ApplyFilterAsync(string code, FilterType filter)
         {
             bool cropped = false;
             if (filter == FilterType.Male || filter == FilterType.Female)
@@ -47,21 +46,10 @@ namespace FaceApp
                 string errorCode = null;
                 if (response.Headers.TryGetValues("X-FaceApp-ErrorCode", out var codes))
                     errorCode = codes.First();
-                var errorResponse = new FaceErrorResponse
-                {
-                    Description = null,
-                    ErrorCode = errorCode,
-                    StatusCode = (int)response.StatusCode
-                };
-                return errorResponse;
+                var exp = HandleException(errorCode);
+                throw exp;
             }
-            var imgStream = await response.Content.ReadAsStreamAsync();
-            var uploadResponse = new FaceApplyResponse
-            {
-                ImageStream = imgStream,
-                StatusCode = (int)response.StatusCode
-            };
-            return uploadResponse;
+            return await response.Content.ReadAsStreamAsync();           
         }
 
         /// <summary>
@@ -70,7 +58,7 @@ namespace FaceApp
         /// <param name="uri"></param>
         /// The valid uri of the image.
         /// <returns></returns>
-        public async Task<IFaceResponse> GetCodeAsync(Uri uri)
+        public async Task<string> GetCodeAsync(Uri uri)
         {
             using (var imageStream = await _client.GetStreamAsync(uri))
             {
@@ -83,19 +71,15 @@ namespace FaceApp
                 request.Content = mutipartContent;
                 var response = await _client.SendAsync(request);
                 var jsonStr = await response.Content.ReadAsStringAsync();
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    var code = JObject.Parse(jsonStr)["code"].ToString(); ;
-                    var faceResponse = new FaceUploadResponse
-                    {
-                        ImageCode = code,
-                        StatusCode = (int)response.StatusCode
-                    };
-                    return faceResponse;
+                    string errorCode = null;
+                    if (response.Headers.TryGetValues("X-FaceApp-ErrorCode", out var codes))
+                        errorCode = codes.First();
+                    var exp = HandleException(errorCode);
+                    throw exp;
                 }
-                var faceErrorResponse = JsonConvert.DeserializeObject<FaceErrorResponse>(jsonStr);
-                faceErrorResponse.StatusCode = (int)response.StatusCode;
-                return faceErrorResponse;
+                return JObject.Parse(jsonStr)["code"].ToString();              
             }
         }
 
@@ -105,7 +89,7 @@ namespace FaceApp
         /// <param name="path"></param>
         /// Valid path of the file.
         /// <returns></returns>
-        public async Task<IFaceResponse> GetCodeAsync(string path)
+        public async Task<string> GetCodeAsync(string path)
         {
             //too lazy to make a proper exception handler.
             if (!File.Exists(path))
@@ -122,24 +106,36 @@ namespace FaceApp
                 request.Content = mutipartContent;
                 var response = await _client.SendAsync(request);
                 var jsonStr = await response.Content.ReadAsStringAsync();
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    var code = JObject.Parse(jsonStr)["code"].ToString(); ;
-                    var faceResponse = new FaceUploadResponse
-                    {
-                        ImageCode = code,
-                        StatusCode = (int)response.StatusCode
-                    };
-                    return faceResponse;
+                    string errorCode = null;
+                    if (response.Headers.TryGetValues("X-FaceApp-ErrorCode", out var codes))
+                        errorCode = codes.First();
+                    var exp = HandleException(errorCode);
+                    throw exp;
                 }
-                var faceErrorResponse = JsonConvert.DeserializeObject<FaceErrorResponse>(jsonStr);
-                faceErrorResponse.StatusCode = (int)response.StatusCode;
-                return faceErrorResponse;
-
+                return JObject.Parse(jsonStr)["code"].ToString();
             }
         }
 
-
+        public FaceException HandleException(string errorCode)
+        {
+            switch (errorCode)
+            {
+                case "device_id_required":
+                    return new FaceException(ExceptionType.NoDeviceIdFound, "No device id was found.");
+                case "photo_no_file_content":
+                    return new FaceException(ExceptionType.NoImageUploaded, "Image payload has an empty body.");
+                case "photos_no_faces":
+                    return new FaceException(ExceptionType.NoFacesDetected, "This image has no faces.");
+                case "bad_filter_id":
+                    return new FaceException(ExceptionType.BadFilter, "The filter specified was not valid");
+                case "photo_not_found":
+                    return new FaceException(ExceptionType.ImageNotFound, "No image found matching the provided image code.");
+                default:
+                    return new FaceException(ExceptionType.Unknown, "Unknown error occured."); 
+            }
+        }
         //Something only a madman would do. :^)
         private string GenerateDeviceId()
             => Guid.NewGuid().ToString().Replace("-", "").Substring(0, ID_LENGTH);
