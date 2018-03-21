@@ -3,27 +3,24 @@ A light-weight wrapper for face app API.
 
 ## How to use?
 ```cs
-//Create a new instance of the FaceAppClient and pass in the HttpClient to it's constructor. (Use Dependency Injection if possible.)
-//Let's call our instance faceClient.
-//Use Uri.TryParse() to parse the string url to Uri.
-if(Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+//Create a new instance of FaceAppClient and pass a instance of HttpClient. (you always want to have only one instance of HttpClient)
+//Note: Using Depedency Injection is recommended because it handles everything fot you.
+
+//_faceApp: FaceAppClient, url: string url
+ if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
 {
-    var bareUpResponse = await faceClient.GetCodeAsync(uri);
-    //Do success checks and cast appropriately i.e FaceUploadResponse for success and FaceErrorResponse for error. 
-    //I am just going to do the success part.
-    if (bareUpResponse.IsSuccess)
+    try
     {
-        var uploadResponse = bareUpResponse as FaceUploadResponse; //Always use soft cast when possible.
-        var bareApplyResponse = await faceClient.ApplyFilterAsync(uploadResponse.ImageCode, FilterType.Smile); //here is where you pick the filer.
-        //Do success checks again and cast appopriately. Use FaceApplyResponse for success and FaceErrorResponse for error.
-        //Note: For the apply endpoint, the API never provided a description so all you have is the error code (For ex: "no_photo_found").
-        if (bareApplyResponse.IsSuccess)
+        var code = await _faceApp.GetCodeAsync(uri);
+        using(var imgStream = await _faceApp.ApplyFilterAsync(code, FilterType.Old))
         {
-            var filterResponse = bareApplyResponse as FaceApplyResponse;
-            //Now you can access the ImageStream property, do whatever you want with it. 
-            //Note: The image will probably be in jpeg format. (Not my fault, don't hit me.)
-        }
+            //do stuff.
+        };
     }
+    catch (FaceException ex)
+    {
+        Console.WriteLine(ex.ToString());
+    }            
 }
 ```
 
