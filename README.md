@@ -1,22 +1,22 @@
 # FaceApp.Net
-A light-weight wrapper for face app API.
+A lightweight wrapper for the FaceApp API.
 
 ## How to use?
 ~~Don't~~
 ```cs
-//Create a new instance of FaceAppClient and pass a instance of HttpClient. (you always want to have only one instance of HttpClient)
-//Note: Using Depedency Injection is recommended because it handles everything fot you.
+//Create a new instance of the FaceAppClient and pass an instance of HttpClient to its constructor (you generally want to only have one instance of the HttpClient).
+//Note: Using Dependency Injection is recommended because it handles everything for you.
 
 //_faceApp: FaceAppClient, url: string url
- if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
 {
     try
     {
         var code = await _faceApp.GetCodeAsync(uri);
-        using(var imgStream = await _faceApp.ApplyFilterAsync(code, FilterType.Old))
+        using (var imgStream = await _faceApp.ApplyFilterAsync(code, FilterType.Old))
         {
             //do stuff.
-        };
+        }
     }
     catch (FaceException ex)
     {
