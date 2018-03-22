@@ -2,6 +2,7 @@
 A light-weight wrapper for face app API.
 
 ## How to use?
+~~Don't~~
 ```cs
 //Create a new instance of FaceAppClient and pass a instance of HttpClient. (you always want to have only one instance of HttpClient)
 //Note: Using Depedency Injection is recommended because it handles everything fot you.
