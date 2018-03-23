@@ -15,7 +15,7 @@ namespace FaceApp
 
         public override string ToString()
         {
-            return $"{Type} : {Message}";
+            return $"{Type}: {Message}";
         }
     }
 }
