@@ -12,6 +12,20 @@ namespace FaceApp
         Young,
         Hot,
         Female,
-        Male
+        Female_2,
+        Pan,
+        Male,
+        Glasses,
+        Hollywood,
+        Goatee,
+        Impression,
+        Heisenberg,
+        Hitman,
+        Bangs,
+        Wave,
+        Makeup,
+        Mustache,
+        Lion,
+        Hipster
     }
 }

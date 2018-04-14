@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -11,19 +13,39 @@ namespace FaceApp
 {
     public class FaceAppClient
     {
-        private const string BASE_URL = "https://node-01.faceapp.io/api/v2.3/photos";
-        private const string USER_AGENT = "FaceApp/1.0.229 (Linux; Android 4.4)";
-        private const int ID_LENGTH = 8;
+        private const string BaseUrl = "https://node-01.faceapp.io/api/v2.9/photos";
+        private const string UserAgent = "FaceApp/1.0.229 (Linux; Android 4.4)";
+        private const int IdLength = 8;
+
         private string _deviceId;
-        private HttpClient _client; 
+        private HttpClient _client;
+
+        private readonly ImmutableArray<FilterType> ProFilters = ImmutableArray.Create(
+        
+            FilterType.Bangs,
+            FilterType.Female,
+            FilterType.Female_2,
+            FilterType.Glasses,
+            FilterType.Goatee,
+            FilterType.Heisenberg,
+            FilterType.Hipster,
+            FilterType.Hitman,
+            FilterType.Hollywood,
+            FilterType.Impression,
+            FilterType.Lion,
+            FilterType.Makeup,
+            FilterType.Male,
+            FilterType.Mustache,
+            FilterType.Pan,
+            FilterType.Wave
+        );
 
         public FaceAppClient(HttpClient client)
         {
             _client = client;
             _deviceId = GenerateDeviceId();
         }
-
-        
+       
         /// <summary>
         /// Applies the filter type provided using the image code.
         /// </summary>
@@ -35,11 +57,11 @@ namespace FaceApp
         public async Task<Stream> ApplyFilterAsync(string code, FilterType filter, CancellationToken ct = default(CancellationToken))
         {
             bool cropped = false;
-            if (filter == FilterType.Male || filter == FilterType.Female)
+            if (ProFilters.Any(x => x == filter))
                 cropped = true;
-            var reqUrl = $"{BASE_URL}/{code}/filters/{filter.ToString().ToLower()}?cropped={cropped}";
+            var reqUrl = $"{BaseUrl}/{code}/filters/{filter.ToString().ToLower()}?cropped={cropped}";
             var request = new HttpRequestMessage(HttpMethod.Get, reqUrl);
-            request.Headers.Add("User-Agent", USER_AGENT);
+            request.Headers.Add("User-Agent", UserAgent);
             request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
             ct.ThrowIfCancellationRequested();
             var response = await _client.SendAsync(request, ct);
@@ -64,8 +86,8 @@ namespace FaceApp
         {
             using (var imageStream = await _client.GetStreamAsync(uri))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, BASE_URL);
-                request.Headers.Add("User-Agent", USER_AGENT);
+                var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl);
+                request.Headers.Add("User-Agent", UserAgent);
                 request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
                 var streamContent = new StreamContent(imageStream);
                 var mutipartContent = new MultipartFormDataContent();
@@ -98,8 +120,8 @@ namespace FaceApp
                 throw new FileNotFoundException("The file specified was not found.");
             using (var imageStream = File.Open(path, FileMode.Open))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, BASE_URL);
-                request.Headers.Add("User-Agent", USER_AGENT);
+                var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl);
+                request.Headers.Add("User-Agent", UserAgent);
                 request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
                 var fileName = Path.GetFileName(path);
                 var streamContent = new StreamContent(imageStream);
@@ -141,6 +163,6 @@ namespace FaceApp
         }
         //Something only a madman would do. :^)
         private string GenerateDeviceId()
-            => Guid.NewGuid().ToString().Replace("-", "").Substring(0, ID_LENGTH);
+            => Guid.NewGuid().ToString().Replace("-", "").Substring(0, IdLength);
     }
 }
