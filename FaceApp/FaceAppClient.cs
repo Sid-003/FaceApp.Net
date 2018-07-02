@@ -64,7 +64,7 @@ namespace FaceApp
             request.Headers.Add("User-Agent", UserAgent);
             request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
             ct.ThrowIfCancellationRequested();
-            var response = await _client.SendAsync(request, ct);
+            var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 string errorCode = null;
@@ -84,7 +84,7 @@ namespace FaceApp
         /// <returns></returns>
         public async Task<string> GetCodeAsync(Uri uri, CancellationToken ct = default(CancellationToken))
         {
-            using (var imageStream = await _client.GetStreamAsync(uri))
+            using (var imageStream = await _client.GetStreamAsync(uri).ConfigureAwait(false))
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl);
                 request.Headers.Add("User-Agent", UserAgent);
@@ -94,7 +94,7 @@ namespace FaceApp
                 mutipartContent.Add(streamContent, "file", "file");
                 request.Content = mutipartContent;
                 ct.ThrowIfCancellationRequested();
-                var response = await _client.SendAsync(request, ct);
+                var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
                 var jsonStr = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
@@ -129,7 +129,7 @@ namespace FaceApp
                 mutipartContent.Add(streamContent, "file", fileName);
                 request.Content = mutipartContent;
                 ct.ThrowIfCancellationRequested();
-                var response = await _client.SendAsync(request, ct);
+                var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
                 var jsonStr = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
