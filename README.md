@@ -1,6 +1,9 @@
 # FaceApp.Net
 A lightweight wrapper for the FaceApp API.
 
+# Note
+This library does not implement ratelimit to prevent you from getting blocked from the API, so I would be careful while using it. 
+
 ## How to use?
 ~~Don't~~
 ```cs
