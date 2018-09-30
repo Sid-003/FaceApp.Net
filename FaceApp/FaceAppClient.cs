@@ -1,13 +1,11 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace FaceApp
 {
@@ -21,7 +19,7 @@ namespace FaceApp
         private HttpClient _client;
 
         private readonly ImmutableArray<FilterType> ProFilters = ImmutableArray.Create(
-        
+
             FilterType.Bangs,
             FilterType.Female,
             FilterType.Female_2,
@@ -41,10 +39,18 @@ namespace FaceApp
         );
 
         public FaceAppClient(HttpClient client)
+<<<<<<< master
+        {
+            _client = client;
+            _deviceId = GenerateDeviceId();
+        }
+
+=======
             => (_client, _deviceId) = (client, GenerateDeviceId());
             
         
        
+>>>>>>> master
         /// <summary>
         /// Applies the filter type provided using the image code.
         /// </summary>
@@ -72,7 +78,7 @@ namespace FaceApp
                 var exp = HandleException(errorCode);
                 throw exp;
             }
-            return await response.Content.ReadAsStreamAsync();           
+            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -89,12 +95,14 @@ namespace FaceApp
                 request.Headers.Add("User-Agent", UserAgent);
                 request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
                 var streamContent = new StreamContent(imageStream);
-                var mutipartContent = new MultipartFormDataContent();
-                mutipartContent.Add(streamContent, "file", "file");
+                var mutipartContent = new MultipartFormDataContent
+                {
+                    { streamContent, "file", "file" }
+                };
                 request.Content = mutipartContent;
                 ct.ThrowIfCancellationRequested();
                 var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
-                var jsonStr = await response.Content.ReadAsStringAsync();
+                var jsonStr = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorCode = null;
@@ -103,7 +111,7 @@ namespace FaceApp
                     var exp = HandleException(errorCode);
                     throw exp;
                 }
-                return JObject.Parse(jsonStr)["code"].ToString();              
+                return JObject.Parse(jsonStr)["code"].ToString();
             }
         }
 
@@ -124,12 +132,14 @@ namespace FaceApp
                 request.Headers.Add("X-FaceApp-DeviceID", _deviceId);
                 var fileName = Path.GetFileName(path);
                 var streamContent = new StreamContent(imageStream);
-                var mutipartContent = new MultipartFormDataContent();
-                mutipartContent.Add(streamContent, "file", fileName);
+                var mutipartContent = new MultipartFormDataContent
+                {
+                    { streamContent, "file", fileName }
+                };
                 request.Content = mutipartContent;
                 ct.ThrowIfCancellationRequested();
                 var response = await _client.SendAsync(request, ct).ConfigureAwait(false);
-                var jsonStr = await response.Content.ReadAsStringAsync();
+                var jsonStr = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorCode = null;
@@ -157,9 +167,10 @@ namespace FaceApp
                 case "photo_not_found":
                     return new FaceException(ExceptionType.ImageNotFound, "No image found matching the provided image code.");
                 default:
-                    return new FaceException(ExceptionType.Unknown, "Unknown error occured."); 
+                    return new FaceException(ExceptionType.Unknown, "Unknown error occured.");
             }
         }
+
         //Something only a madman would do. :^)
         private string GenerateDeviceId()
             => Guid.NewGuid().ToString().Replace("-", "").Substring(0, IdLength);
