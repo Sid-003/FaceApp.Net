@@ -39,18 +39,10 @@ namespace FaceApp
         );
 
         public FaceAppClient(HttpClient client)
-<<<<<<< master
-        {
-            _client = client;
-            _deviceId = GenerateDeviceId();
-        }
-
-=======
             => (_client, _deviceId) = (client, GenerateDeviceId());
-            
         
-       
->>>>>>> master
+
+ 
         /// <summary>
         /// Applies the filter type provided using the image code.
         /// </summary>
