@@ -149,17 +149,17 @@ namespace FaceApp
             switch (errorCode)
             {
                 case "device_id_required":
-                    return new FaceException(ExceptionType.NoDeviceIdFound, "No device id was found.");
+                    return new FaceException(ExceptionType.NoDeviceIdFound, "DeviceId not provided.");
                 case "photo_no_file_content":
-                    return new FaceException(ExceptionType.NoImageUploaded, "Image payload has an empty body.");
+                    return new FaceException(ExceptionType.NoImageUploaded, "Empty image payload provided.");
                 case "photos_no_faces":
-                    return new FaceException(ExceptionType.NoFacesDetected, "This image has no faces.");
+                    return new FaceException(ExceptionType.NoFacesDetected, "No faces detected for the provided image.");
                 case "bad_filter_id":
-                    return new FaceException(ExceptionType.BadFilter, "The filter specified was not valid");
+                    return new FaceException(ExceptionType.BadFilter, "Invalid filter provided.");
                 case "photo_not_found":
-                    return new FaceException(ExceptionType.ImageNotFound, "No image found matching the provided image code.");
+                    return new FaceException(ExceptionType.ImageNotFound, "Image not found with the provided image code.");
                 default:
-                    return new FaceException(ExceptionType.Unknown, "Unknown error occured.");
+                    return new FaceException(ExceptionType.Unknown, "Unknown Error.");
             }
         }
 
