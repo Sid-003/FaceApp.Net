@@ -41,10 +41,9 @@ namespace FaceApp
         );
 
         public FaceAppClient(HttpClient client)
-        {
-            _client = client;
-            _deviceId = GenerateDeviceId();
-        }
+            => (_client, _deviceId) = (client, GenerateDeviceId());
+            
+        
        
         /// <summary>
         /// Applies the filter type provided using the image code.
@@ -143,7 +142,7 @@ namespace FaceApp
             }
         }
 
-        public FaceException HandleException(string errorCode)
+        private FaceException HandleException(string errorCode)
         {
             switch (errorCode)
             {
