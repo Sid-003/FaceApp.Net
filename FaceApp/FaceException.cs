@@ -6,10 +6,18 @@ namespace FaceApp
     {
         public ExceptionType Type { get; }
 
+<<<<<<< master
         public FaceException(ExceptionType type, string message) : base(message) 
             => Type = type;
 
         public override string ToString() 
+=======
+        public FaceException(ExceptionType type, string message) : base(message)
+            => Type = type;
+        
+
+        public override string ToString()
+>>>>>>> master
             => $"{Type}: {Message}";
     }
 }
