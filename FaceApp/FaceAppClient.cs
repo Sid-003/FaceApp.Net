@@ -15,8 +15,8 @@ namespace FaceApp
         private const string UserAgent = "FaceApp/1.0.229 (Linux; Android 4.4)";
         private const int IdLength = 8;
 
-        private string _deviceId;
-        private HttpClient _client;
+        private readonly string _deviceId;
+        private readonly HttpClient _client;
 
         private readonly ImmutableArray<FilterType> ProFilters = ImmutableArray.Create(
 

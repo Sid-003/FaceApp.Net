@@ -4,7 +4,7 @@
     {
         Unknown,
         BadImageType,
-        NoFacesDetected,
+        NoFaceDetected,
         BadFilter,
         NoImageUploaded,
         NoDeviceIdFound,
