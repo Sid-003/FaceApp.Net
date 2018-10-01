@@ -28,6 +28,10 @@ if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
 }
 ```
 
+# Example
+![Normal Zucc](https://raw.githubusercontent.com/Sid-003/FaceApp.Net/master/Examples/zucc_normal.jpg)
+![Happy Zucc](https://raw.githubusercontent.com/Sid-003/FaceApp.Net/master/Examples/zucc_happy.png)
+
 ## Credits
 I used [Faces](https://github.com/vasilysinitsin/Faces), a python wrapper, to figure out the endpoint as it was not documented.
 
